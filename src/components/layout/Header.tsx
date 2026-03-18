@@ -32,14 +32,14 @@ export function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-sm text-white">
           <div className="flex items-center gap-6">
             <a
-              href="mailto:bookinn.hotel@gmail.com"
+              href="mailto:ubhotel.hotel@gmail.com"
               className="flex items-center gap-2 hover:text-teal-300"
             >
               <span className="sr-only">Email</span>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              bookinn.hotel@gmail.com
+              ubhotel.hotel@gmail.com
             </a>
             <a
               href="tel:+01236547587"
@@ -93,6 +93,11 @@ export function Header() {
                 </ul>
               )}
             </div>
+            <Link href="/signup">
+              <Button variant="default" size="sm" className="gap-2 bg-teal-600 hover:bg-teal-500">
+                {t.nav.signup}
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="outline" size="sm" className="gap-2 border-white text-white hover:bg-white/10">
                 <User className="h-4 w-4" aria-hidden />
@@ -112,7 +117,7 @@ export function Header() {
       <nav className="relative z-50 border-b border-white/20 bg-black/20 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <Link href="/" className="text-2xl font-bold tracking-tight text-white">
-            BookINN
+            UbHotel
           </Link>
           <ul className="flex items-center gap-8">
             <li><Link href="/" className="text-white hover:text-teal-300">{t.nav.home}</Link></li>

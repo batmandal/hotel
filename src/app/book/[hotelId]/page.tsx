@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ export default function BookPage() {
   const [checkIn, setCheckIn] = useState('2025-04-01');
   const [checkOut, setCheckOut] = useState('2025-04-03');
   const [guests, setGuests] = useState(2);
+  const [roomCount, setRoomCount] = useState(1);
   const [roomId, setRoomId] = useState(preselectedRoomId);
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<typeof discounts[0] | null>(null);
@@ -32,8 +33,26 @@ export default function BookPage() {
   const [otpError, setOtpError] = useState('');
 
   const hotel = useMemo(() => getHotelById(hotelId), [hotelId]);
-  const rooms = useMemo(() => (hotel ? getRoomsByHotelId(hotel.id) : []), [hotel]);
-  const selectedRoom = roomId ? rooms.find((r) => r.id === roomId) : rooms[0];
+  const allRooms = useMemo(() => (hotel ? getRoomsByHotelId(hotel.id) : []), [hotel]);
+
+  const availableRooms = useMemo(() => {
+    if (!allRooms.length) return [];
+    const minGuestsPerRoom = Math.ceil(guests / Math.max(1, roomCount));
+    return allRooms.filter(
+      (r) => r.status === 'available' && r.maxGuests >= minGuestsPerRoom
+    );
+  }, [allRooms, guests, roomCount]);
+
+  useEffect(() => {
+    const currentInList = availableRooms.some((r) => r.id === roomId);
+    if (!currentInList && availableRooms.length > 0) {
+      setRoomId(availableRooms[0].id);
+    } else if (availableRooms.length === 0 && roomId) {
+      setRoomId('');
+    }
+  }, [availableRooms, roomId]);
+
+  const selectedRoom = roomId ? availableRooms.find((r) => r.id === roomId) ?? availableRooms[0] : availableRooms[0];
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
     const a = new Date(checkIn);
@@ -47,13 +66,13 @@ export default function BookPage() {
     return calculateBookingTotal({
       basePricePerNight: selectedRoom.basePricePerNight,
       nights,
-      roomCount: 1,
+      roomCount,
       guests,
       maxGuestsPerRoom: selectedRoom.maxGuests,
       services: [],
       discount: discount ?? undefined,
     });
-  }, [selectedRoom, nights, guests, discountCode, appliedDiscount]);
+  }, [selectedRoom, nights, roomCount, guests, discountCode, appliedDiscount]);
 
   const handleApplyCode = () => {
     const d = discounts.find((x) => x.code.toUpperCase() === discountCode.toUpperCase());
@@ -138,19 +157,28 @@ export default function BookPage() {
               <Input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="mt-1" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Guests</label>
+              <label className="block text-sm font-medium text-gray-700">{t.booking.guests}</label>
               <Input type="number" min={1} value={guests} onChange={(e) => setGuests(Number(e.target.value))} className="mt-1" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Room</label>
+              <label className="block text-sm font-medium text-gray-700">{t.booking.roomCount}</label>
+              <Input type="number" min={1} value={roomCount} onChange={(e) => setRoomCount(Math.max(1, Number(e.target.value) || 1))} className="mt-1" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">{t.booking.room}</label>
+              <p className="mt-1 text-xs text-gray-500">{t.booking.availableRoomsFor}</p>
               <select
-                value={roomId || (rooms[0]?.id ?? '')}
+                value={roomId || (availableRooms[0]?.id ?? '')}
                 onChange={(e) => setRoomId(e.target.value)}
-                className="mt-1 flex h-10 w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="mt-1.5 flex h-10 w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
               >
-                {rooms.map((r) => (
-                  <option key={r.id} value={r.id}>{r.typeName} - ${r.basePricePerNight}/night</option>
-                ))}
+                {availableRooms.length === 0 ? (
+                  <option value="">{locale === 'mn' ? 'Таньд тохирох боломжит өрөө олдсонгүй' : 'No rooms match your criteria'}</option>
+                ) : (
+                  availableRooms.map((r) => (
+                    <option key={r.id} value={r.id}>{r.typeName} – {locale === 'mn' ? 'хүн' : 'guests'}: {r.maxGuests} · ${r.basePricePerNight}/night</option>
+                  ))
+                )}
               </select>
             </div>
             {selectedRoom && (selectedRoom.description ?? selectedRoom.descriptionMn) && (
@@ -176,7 +204,7 @@ export default function BookPage() {
             <h2 className="font-semibold text-gray-900">{t.booking.total}</h2>
             {breakdown && (
               <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li className="flex justify-between">Base ({nights} nights)</li>
+                <li className="flex justify-between">Base ({nights} {t.common.nights} × {roomCount} {locale === 'mn' ? 'өрөө' : 'rooms'})</li>
                 <li className="flex justify-between">${breakdown.totalBase.toFixed(2)}</li>
                 {breakdown.discountAmount > 0 && (
                   <li className="flex justify-between text-teal-600">Discount -${breakdown.discountAmount.toFixed(2)}</li>

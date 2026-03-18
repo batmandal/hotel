@@ -36,8 +36,8 @@ export function TestimonialsCarousel() {
             {t.home?.customerSay ?? 'Customer Say About Our Services'}
           </h2>
         </div>
-        <div className="mt-12 flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl md:flex-row">
-          <div className="relative h-64 w-full md:h-auto md:w-1/3">
+        <div className="mt-12 flex min-h-[320px] flex-col overflow-hidden rounded-2xl bg-white shadow-xl md:min-h-[280px] md:flex-row">
+          <div className="relative h-64 w-full shrink-0 md:h-auto md:min-h-[280px] md:w-1/3">
             <Image
               src={current.roomImageUrl ?? 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600'}
               alt=""
@@ -46,9 +46,9 @@ export function TestimonialsCarousel() {
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           </div>
-          <div className="flex flex-1 flex-col justify-center p-8 md:p-12">
-            <Quote className="h-12 w-12 text-teal-200" aria-hidden />
-            <blockquote className="mt-4 text-gray-700">
+          <div className="flex min-h-[200px] flex-1 flex-col justify-center p-8 md:min-h-0 md:p-12">
+            <Quote className="h-12 w-12 shrink-0 text-teal-200" aria-hidden />
+            <blockquote className="mt-4 min-h-[4.5rem] text-gray-700 md:min-h-[5rem]">
               {locale === 'mn' && current.textMn ? current.textMn : current.text}
             </blockquote>
             <div className="mt-6 flex items-center gap-4">
