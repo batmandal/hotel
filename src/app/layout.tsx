@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BookINN - Hotel Management & Booking",
-  description: "Find, book, and manage your dream stay. Hotels, villas, and resorts worldwide.",
+  title: "UbHotel - Hotel Management & Booking",
+  description:
+    "Find, book, and manage your dream stay. Hotels, villas, and resorts worldwide.",
 };
 
 export default function RootLayout({

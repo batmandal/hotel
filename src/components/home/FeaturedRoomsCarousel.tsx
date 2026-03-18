@@ -53,7 +53,7 @@ export function FeaturedRoomsCarousel() {
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {visible.map((room, i) => {
             const hotel = room.hotel;
-            const slug = hotel?.slug ?? "bookinn-ulaanbaatar";
+            const slug = hotel?.slug ?? "UbHotel-ulaanbaatar";
             const imgUrl =
               hotel?.imageUrls?.[0] ??
               "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600";
