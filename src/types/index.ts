@@ -80,11 +80,15 @@ export interface Room {
   basePricePerNight: number;
   maxGuests: number;
   maxExtraBeds: number;
+  beds?: number;
+  isCleaned?: boolean;
   amenities: string[];
   sizeSqm?: number;
   recommended?: boolean;
   description?: string;
   descriptionMn?: string;
+  /** Өрөөний зургийн цомог (дэлгэрэнгүй хуудас) — хамгийн багадаа 2 зураг зөвлөмжтэй */
+  imageUrls?: string[];
   videoUrl?: string;
   videoThumbnailUrl?: string;
 }

@@ -25,15 +25,15 @@ export function ServicesCarousel() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex items-end justify-between">
           <div>
-            <span className="inline-block rounded-full bg-teal-100 px-4 py-1.5 text-sm font-medium text-teal-700">
+            <span className="inline-block rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground shadow-sm">
               {t.home?.services ?? 'Services'}
             </span>
-            <h2 className="mt-4 text-3xl font-bold text-gray-900">
+            <h2 className="mt-4 font-display italic text-3xl font-bold text-gray-900">
               {t.home?.premiumServices ?? 'Premium Hospitality Services'}
             </h2>
           </div>
           <Link href="/rooms">
-            <Button variant="outline" className="gap-2 border-teal-500 text-teal-600">
+            <Button variant="outline" className="gap-2 border-brand text-brand">
               {t.home?.viewMore ?? 'View More'}
               <ChevronRight className="h-4 w-4" />
             </Button>

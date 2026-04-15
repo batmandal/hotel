@@ -11,6 +11,7 @@ import { getHotelBySlug, getRoomsByHotelId, getLocationById } from '@/data/mockD
 import { Footer } from '@/components/layout/Footer';
 import { useTranslations } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
+import { formatPriceFromUsd } from '@/lib/pricing';
 
 export default function HotelDetailPage() {
   const params = useParams();
@@ -26,7 +27,7 @@ export default function HotelDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-16 text-center">
         <p className="text-gray-500">Hotel not found.</p>
-        <Link href="/" className="mt-4 inline-block text-teal-600 hover:underline">Back to home</Link>
+        <Link href="/" className="mt-4 inline-block text-brand hover:underline">Back to home</Link>
       </div>
     );
   }
@@ -34,9 +35,9 @@ export default function HotelDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="relative h-[40vh] w-full pt-24">
+      <div className="relative h-[40vh] w-full pt-32">
         <Image
-          src={fullHotel.imageUrls?.[0] ?? 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1920'}
+          src={fullHotel.imageUrls?.[0] ?? 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920'}
           alt={fullHotel.name}
           fill
           className="object-cover"
@@ -68,7 +69,7 @@ export default function HotelDetailPage() {
               <ul className="mt-2 flex flex-wrap gap-2">
                 {fullHotel.amenities?.map((a) => (
                   <li key={a} className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm">
-                    <Wifi className="h-4 w-4 text-teal-600" aria-hidden />
+                    <Wifi className="h-4 w-4 text-brand" aria-hidden />
                     {a}
                   </li>
                 ))}
@@ -77,9 +78,8 @@ export default function HotelDetailPage() {
           </div>
           <div>
             <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <p className="text-sm text-gray-500">From</p>
-              <p className="text-2xl font-bold text-teal-600">
-                ${fullHotel.basePricePerNight}
+              <p className="text-2xl font-bold text-brand wrap-break-word">
+                {formatPriceFromUsd(fullHotel.basePricePerNight, locale)}
                 <span className="text-base font-normal text-gray-500"> {t.common.perNight}</span>
               </p>
               <Link href={`/book/${fullHotel.id}`}>
@@ -95,14 +95,14 @@ export default function HotelDetailPage() {
               <div key={room.id} className="rounded-lg border bg-white p-4">
                 <div className="flex justify-between">
                   <div>
-                    <Link href={`/hotels/${fullHotel.slug}/rooms/${room.id}`} className="font-medium text-gray-900 hover:text-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 rounded">
+                    <Link href={`/hotels/${fullHotel.slug}/rooms/${room.id}`} className="font-medium text-gray-900 hover:text-brand focus:outline-none focus:ring-2 focus:ring-brand rounded">
                       {room.typeName}
                     </Link>
                     <p className="text-sm text-gray-500">Room {room.number} · Floor {room.floor}</p>
                     <p className="mt-1 text-sm text-gray-600">Up to {room.maxGuests} guests</p>
                   </div>
                   <div className="text-right flex flex-col items-end gap-2">
-                    <p className="font-semibold text-teal-600">${room.basePricePerNight} {t.common.perNight}</p>
+                    <p className="font-semibold text-brand wrap-break-word max-w-48 sm:max-w-none">{formatPriceFromUsd(room.basePricePerNight, locale)} {t.common.perNight}</p>
                     <div className="flex gap-2">
                       <Link href={`/hotels/${fullHotel.slug}/rooms/${room.id}`}>
                         <Button size="sm" variant="outline">{locale === 'mn' ? 'Дэлгэрэнгүй' : 'Details'}</Button>

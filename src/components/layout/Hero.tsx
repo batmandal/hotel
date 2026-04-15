@@ -13,10 +13,10 @@ export function Hero() {
     <section className="relative h-screen w-full">
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1920"
-          alt="Luxury resort with pool and lounge area"
+          src="/hero-bg.webp"
+          alt="City hotel exterior"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
           sizes="100vw"
         />
@@ -26,9 +26,9 @@ export function Hero() {
         <p className="mb-4 text-sm font-medium uppercase tracking-widest text-white/90">
           {t.hero.tagline}
         </p>
-        <h1 className="mb-6 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl">
+        <h1 className="mb-6 max-w-4xl font-display text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl">
           {t.hero.title}
-          <span className="italic text-teal-400"> {t.hero.titleHighlight} </span>
+          <span className="italic text-brand-accent"> {t.hero.titleHighlight} </span>
           {t.hero.titleEnd}
         </h1>
         <p className="max-w-2xl text-lg text-white/90">

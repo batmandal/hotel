@@ -2,18 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
+import { useAuth } from '@/context/AuthContext';
+import { AuthFormCard, AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 
-const SIGNUP_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200';
+// City/business hotel vibe (not resort)
+const SIGNUP_IMAGE = 'https://images.unsplash.com/photo-1562790351-d273a961e0e9?w=1920';
+
+const inputClass =
+  'mt-2 h-11 rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/70 focus-visible:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/25';
 
 export default function SignupPage() {
   const router = useRouter();
   const { locale } = useLocale();
+  const { login } = useAuth();
   const t = useTranslations(locale);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -21,6 +27,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,155 +39,163 @@ export default function SignupPage() {
       return;
     }
     if (firstName && lastName && phone && email && password) {
-      router.push('/login');
+      login(email, 'GUEST', {
+        displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+        phone: phone.trim(),
+      });
+      router.push('/');
     }
   };
 
   const signupT = (t as { signup?: { title: string; subtitle: string; firstName: string; lastName: string; phone: string; email: string; password: string; confirmPassword: string; submit: string; haveAccount: string; backHome: string } }).signup;
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left: image / brand */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gray-900">
-        <Image
-          src={SIGNUP_IMAGE}
-          alt=""
-          fill
-          className="object-cover opacity-90"
-          sizes="50vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-          <Link href="/" className="inline-block">
-            <span className="text-2xl font-bold tracking-tight">UbHotel</span>
-          </Link>
-          <p className="mt-4 text-sm text-white/90 max-w-sm">
-            {locale === 'mn'
-              ? 'Шинэ бүртгэл үүсгээд захиалгаа хялбархан хий. Нэгдэнэ үү.'
-              : 'Create an account and book with ease. Join us today.'}
-          </p>
-        </div>
-      </div>
-
-      {/* Right: form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 overflow-auto">
-        <div className="mx-auto w-full max-w-sm">
-          <div className="lg:hidden mb-8">
-            <Link href="/" className="text-xl font-bold text-teal-600">UbHotel</Link>
+    <AuthSplitLayout
+      imageSrc={SIGNUP_IMAGE}
+      variant="overlay"
+      brandTagline={
+        locale === 'mn' ? (
+          <>Бүртгүүлээд өрөөгөө захиалаарай.</>
+        ) : (
+          <>Sign up and start booking.</>
+        )
+      }
+      contentMaxClassName="max-w-lg"
+    >
+      <AuthFormCard variant="glass">
+        <h1 className="text-center text-3xl font-bold tracking-tight text-white">
+          {signupT?.title ?? (locale === 'mn' ? 'Бүртгэл үүсгэх' : 'Create account')}
+        </h1>
+        <p className="mt-2 text-center text-sm text-white/80">
+          {signupT?.subtitle ?? (locale === 'mn' ? 'Доорх мэдээллээр бүртгүүлнэ үү.' : 'Join UbHotel with your details below.')}
+        </p>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="signup-firstName" className="block text-sm font-medium text-white/90">
+                {signupT?.firstName ?? (locale === 'mn' ? 'Нэр' : 'First name')}
+              </label>
+              <Input
+                id="signup-firstName"
+                type="text"
+                placeholder={locale === 'mn' ? 'Нэр' : 'John'}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className={inputClass}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="signup-lastName" className="block text-sm font-medium text-white/90">
+                {signupT?.lastName ?? (locale === 'mn' ? 'Овог' : 'Last name')}
+              </label>
+              <Input
+                id="signup-lastName"
+                type="text"
+                placeholder={locale === 'mn' ? 'Овог' : 'Doe'}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className={inputClass}
+                required
+              />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{signupT?.title ?? (locale === 'mn' ? 'Бүртгэл үүсгэх' : 'Create account')}</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            {signupT?.subtitle ?? (locale === 'mn' ? 'Доорх мэдээллээр бүртгүүлнэ үү.' : 'Join UbHotel with your details below.')}
-          </p>
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="signup-firstName" className="block text-sm font-medium text-gray-700">
-                  {signupT?.firstName ?? (locale === 'mn' ? 'Нэр' : 'First name')}
-                </label>
-                <Input
-                  id="signup-firstName"
-                  type="text"
-                  placeholder={locale === 'mn' ? 'Нэр' : 'John'}
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1.5"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="signup-lastName" className="block text-sm font-medium text-gray-700">
-                  {signupT?.lastName ?? (locale === 'mn' ? 'Овог' : 'Last name')}
-                </label>
-                <Input
-                  id="signup-lastName"
-                  type="text"
-                  placeholder={locale === 'mn' ? 'Овог' : 'Doe'}
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1.5"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="signup-phone" className="block text-sm font-medium text-gray-700">
-                {signupT?.phone ?? (locale === 'mn' ? 'Утасны дугаар' : 'Phone number')}
-              </label>
-              <Input
-                id="signup-phone"
-                type="tel"
-                placeholder={locale === 'mn' ? '+976 9999 9999' : '+1 234 567 890'}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1.5"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700">
-                {signupT?.email ?? (locale === 'mn' ? 'Имэйл' : 'Email')}
-              </label>
-              <Input
-                id="signup-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700">
-                {signupT?.password ?? (locale === 'mn' ? 'Нууц үг' : 'Password')}
-              </label>
+          <div>
+            <label htmlFor="signup-phone" className="block text-sm font-medium text-white/90">
+              {signupT?.phone ?? (locale === 'mn' ? 'Утасны дугаар' : 'Phone number')}
+            </label>
+            <Input
+              id="signup-phone"
+              type="tel"
+              placeholder="+976 9911 2233"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={inputClass}
+              inputMode="tel"
+              autoComplete="tel"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="signup-email" className="block text-sm font-medium text-white/90">
+              {signupT?.email ?? (locale === 'mn' ? 'Имэйл' : 'Email')}
+            </label>
+            <Input
+              id="signup-email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputClass}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="signup-password" className="block text-sm font-medium text-white/90">
+              {signupT?.password ?? (locale === 'mn' ? 'Нууц үг' : 'Password')}
+            </label>
+            <div className="relative mt-2">
               <Input
                 id="signup-password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5"
+                className={`${inputClass} pr-16`}
                 required
                 minLength={6}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center text-xs font-medium text-white/85 hover:text-white"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
             </div>
-            <div>
-              <label htmlFor="signup-confirmPassword" className="block text-sm font-medium text-gray-700">
-                {signupT?.confirmPassword ?? (locale === 'mn' ? 'Нууц үг баталгаажуулах' : 'Confirm password')}
-              </label>
+          </div>
+          <div>
+            <label htmlFor="signup-confirmPassword" className="block text-sm font-medium text-white/90">
+              {signupT?.confirmPassword ?? (locale === 'mn' ? 'Нууц үг баталгаажуулах' : 'Confirm password')}
+            </label>
+            <div className="relative mt-2">
               <Input
                 id="signup-confirmPassword"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1.5"
+                className={`${inputClass} pr-16`}
                 required
                 minLength={6}
               />
-              {passwordError && (
-                <p className="mt-1.5 text-sm text-red-600" role="alert">{passwordError}</p>
-              )}
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center text-xs font-medium text-white/85 hover:text-white"
+              >
+                {showConfirmPassword ? 'Hide' : 'Show'}
+              </button>
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              {signupT?.submit ?? (locale === 'mn' ? 'Бүртгүүлэх' : 'Sign up')}
-            </Button>
-          </form>
-          <p className="mt-6 text-center text-sm text-gray-500">
-            {signupT?.haveAccount ?? (locale === 'mn' ? 'Аль хэдийн бүртгэлтэй юу?' : 'Already have an account?')}{' '}
-            <Link href="/login" className="text-teal-600 hover:text-teal-700 font-medium">
-              {t.nav.login}
-            </Link>
-          </p>
-          <Link
-            href="/"
-            className="mt-4 block text-center text-sm text-teal-600 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 rounded"
+            {passwordError ? (
+              <p className="mt-1.5 text-sm text-red-200" role="alert">
+                {passwordError}
+              </p>
+            ) : null}
+          </div>
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-xl bg-white/85 text-gray-900 hover:bg-white shadow-sm text-base font-semibold"
+            size="lg"
           >
-            {signupT?.backHome ?? (locale === 'mn' ? 'Нүүр хуудас руу буцах' : 'Back to home')}
+            {signupT?.submit ?? (locale === 'mn' ? 'Бүртгүүлэх' : 'Sign up')}
+          </Button>
+        </form>
+        <p className="mt-6 text-center text-sm text-white/80">
+          {signupT?.haveAccount ?? (locale === 'mn' ? 'Аль хэдийн бүртгэлтэй юу?' : 'Already have an account?')}{' '}
+          <Link href="/login" className="font-semibold text-white hover:text-white underline underline-offset-4">
+            {t.nav.login}
           </Link>
-        </div>
-      </div>
-    </div>
+        </p>
+      </AuthFormCard>
+    </AuthSplitLayout>
   );
 }

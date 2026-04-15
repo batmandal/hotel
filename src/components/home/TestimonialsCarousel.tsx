@@ -29,10 +29,10 @@ export function TestimonialsCarousel() {
     <section id="testimonial" className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4">
         <div className="text-center">
-          <span className="inline-block rounded-full bg-teal-100 px-4 py-1.5 text-sm font-medium text-teal-700">
+          <span className="inline-block rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground shadow-sm">
             {t.home?.testimonial ?? 'Testimonial'}
           </span>
-          <h2 className="mt-4 text-3xl font-bold text-gray-900">
+          <h2 className="mt-4 font-display italic text-3xl font-bold text-gray-900">
             {t.home?.customerSay ?? 'Customer Say About Our Services'}
           </h2>
         </div>
@@ -47,12 +47,12 @@ export function TestimonialsCarousel() {
             />
           </div>
           <div className="flex min-h-[200px] flex-1 flex-col justify-center p-8 md:min-h-0 md:p-12">
-            <Quote className="h-12 w-12 shrink-0 text-teal-200" aria-hidden />
+            <Quote className="h-12 w-12 shrink-0 text-brand-muted" aria-hidden />
             <blockquote className="mt-4 min-h-[4.5rem] text-gray-700 md:min-h-[5rem]">
               {locale === 'mn' && current.textMn ? current.textMn : current.text}
             </blockquote>
             <div className="mt-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-teal-100" />
+              <div className="h-12 w-12 rounded-full bg-brand-muted" />
               <div>
                 <p className="font-semibold text-gray-900">{current.author}</p>
                 <div className="flex gap-1 text-amber-500">
@@ -68,7 +68,7 @@ export function TestimonialsCarousel() {
           <button
             type="button"
             onClick={() => setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-brand shadow-sm hover:bg-brand-muted"
             aria-label="Previous"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -76,7 +76,7 @@ export function TestimonialsCarousel() {
           <button
             type="button"
             onClick={() => setIndex((i) => (i + 1) % testimonials.length)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-brand shadow-sm hover:bg-brand-muted"
             aria-label="Next"
           >
             <ChevronRight className="h-5 w-5" />

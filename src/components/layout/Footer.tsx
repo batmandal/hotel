@@ -26,7 +26,6 @@ export function Footer() {
     t.footer?.gymSpa ?? 'GYM and Spa',
     t.footer?.swimmingPool ?? 'Swimming Pool',
     t.footer?.restaurant ?? 'Restaurant',
-    t.footer?.pickUpDrop ?? 'Pick Up & Drop',
     t.footer?.parking ?? 'Parking Space',
   ];
 
@@ -44,21 +43,21 @@ export function Footer() {
       <div className="border-b border-gray-700">
         <div className="mx-auto max-w-7xl px-4 py-12 md:flex md:items-center md:justify-between md:gap-8">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-teal-400">
+            <p className="text-sm font-medium uppercase tracking-wider text-brand-accent">
               {t.footer?.exploreRooms ?? 'Explore our Rooms'}
             </p>
             <h2 className="mt-2 text-2xl font-bold">
               {t.footer?.perfectLocation ?? 'Perfect Location for a Relaxing Vacation.'}
             </h2>
             <Link href="/rooms">
-              <Button className="mt-4 gap-2 bg-teal-600 hover:bg-teal-700">
+              <Button className="mt-4 gap-2 bg-brand hover:bg-brand-hover">
                 {t.footer?.contactUs ?? 'Contact Us'}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>
           </div>
           <div className="mt-8 md:mt-0 md:max-w-md md:flex-1">
-            <p className="text-sm font-medium uppercase tracking-wider text-teal-400">
+            <p className="text-sm font-medium uppercase tracking-wider text-brand-accent">
               {t.footer?.newsletter ?? 'Newsletter'}
             </p>
             <h2 className="mt-2 text-2xl font-bold">
@@ -72,7 +71,7 @@ export function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 border-gray-600 bg-gray-800 text-white placeholder:text-gray-400"
               />
-              <Button type="submit" className="gap-2 bg-teal-600 hover:bg-teal-700 shrink-0">
+              <Button type="submit" className="gap-2 bg-brand hover:bg-brand-hover shrink-0">
                 {t.footer?.signUp ?? 'Sign Up'}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -84,13 +83,15 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="text-xl font-bold">BookINN</h3>
+            <h3 className="text-xl font-bold">UbHotel</h3>
             <p className="mt-3 text-sm leading-relaxed text-gray-400">
-              Discover the best hotels, villas, resorts, and duplex stays with ease. We&apos;re committed to providing seamless booking experiences and unforgettable stays tailored to your travel needs.
+              {locale === 'mn'
+                ? 'Улаанбаатар хотын зочид буудлын захиалга, үйлчилгээ. Тав тухтай байр, найдвартай үйлчилгээ.'
+                : 'City hotel booking in Ulaanbaatar. Comfortable rooms and reliable service for every guest.'}
             </p>
             <div className="mt-4 flex gap-4">
               {socialIcons.map((s) => (
-                <a key={s.name} href={s.href} className="text-gray-400 hover:text-teal-400" aria-label={s.name}>
+                <a key={s.name} href={s.href} className="text-gray-400 hover:text-brand-accent" aria-label={s.name}>
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path d={s.icon} />
                   </svg>
@@ -103,7 +104,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2">
               {footerServices.map((name) => (
                 <li key={name}>
-                  <span className="text-sm text-gray-400 hover:text-teal-400">{name}</span>
+                  <span className="text-sm text-gray-400 hover:text-brand-accent">{name}</span>
                 </li>
               ))}
             </ul>
@@ -113,7 +114,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2">
               {popularLinks.map(({ label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-sm text-gray-400 hover:text-teal-400">
+                  <Link href={href} className="text-sm text-gray-400 hover:text-brand-accent">
                     {label}
                   </Link>
                 </li>
@@ -122,21 +123,21 @@ export function Footer() {
           </div>
           <div>
             <h3 className="font-bold text-white">{t.footer?.contactUs ?? 'Contact Us'}</h3>
-            <a href="mailto:bookinn.hotel@gmail.com" className="mt-4 flex items-center gap-2 text-sm text-gray-400 hover:text-teal-400">
-              <Mail className="h-4 w-4 text-teal-400" aria-hidden />
-              bookinn.hotel@gmail.com
+            <a href="mailto:info@ubhotel.mn" className="mt-4 flex items-center gap-2 text-sm text-gray-400 hover:text-brand-accent">
+              <Mail className="h-4 w-4 text-brand-accent" aria-hidden />
+              info@ubhotel.mn
             </a>
-            <a href="tel:+01236547587" className="mt-2 flex items-center gap-2 text-sm text-gray-400 hover:text-teal-400">
-              <Phone className="h-4 w-4 text-teal-400" aria-hidden />
-              + 01 236 547 587
+            <a href="tel:+97670112233" className="mt-2 flex items-center gap-2 text-sm text-gray-400 hover:text-brand-accent">
+              <Phone className="h-4 w-4 text-brand-accent" aria-hidden />
+              +976 7011 2233
             </a>
             <div className="mt-6 space-y-4">
               <div>
-                <p className="text-2xl font-bold">58,66,745</p>
+                <p className="text-2xl font-bold">12,500+</p>
                 <p className="text-sm text-gray-400">{t.footer?.totalBooking ?? 'Total Booking'}</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">2,846,395</p>
+                <p className="text-2xl font-bold">8,200+</p>
                 <p className="text-sm text-gray-400">{t.footer?.activeUsers ?? 'Active Users'}</p>
               </div>
             </div>
@@ -146,11 +147,11 @@ export function Footer() {
       {/* Bottom strip */}
       <div className="border-t border-gray-800">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row">
-          <p className="text-sm text-gray-500">BookINN © 2025, All Right Reserved</p>
+          <p className="text-sm text-gray-500">UbHotel © 2026</p>
           <div className="flex gap-6 text-sm text-gray-500">
-            <Link href="#" className="hover:text-teal-400">Privacy Policy</Link>
+            <Link href="#" className="hover:text-brand-accent">{locale === 'mn' ? 'Нууцлалын бодлого' : 'Privacy Policy'}</Link>
             <span>|</span>
-            <Link href="#" className="hover:text-teal-400">Terms & Conditions</Link>
+            <Link href="#" className="hover:text-brand-accent">{locale === 'mn' ? 'Үйлчилгээний нөхцөл' : 'Terms & Conditions'}</Link>
           </div>
         </div>
       </div>

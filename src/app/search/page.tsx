@@ -11,6 +11,7 @@ import { getHotelsWithLocation } from '@/data/mockData';
 import { Footer } from '@/components/layout/Footer';
 import { useTranslations } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
+import { formatPriceFromUsd } from '@/lib/pricing';
 import type { HotelCategory } from '@/types';
 
 function SearchContent() {
@@ -42,10 +43,12 @@ function SearchContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="border-b bg-white py-4 pt-28">
+      <div className="border-b bg-white py-4 pt-32">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-2xl font-bold text-gray-900">
-            {hotels.length} {hotels.length === 1 ? 'hotel' : 'hotels'} found
+            {locale === 'mn'
+              ? `${hotels.length} зочид буудал олдлоо`
+              : `${hotels.length} ${hotels.length === 1 ? 'hotel' : 'hotels'} found`}
           </h1>
         </div>
       </div>
@@ -80,9 +83,9 @@ function SearchContent() {
                   )}
                   <p className="mt-2 line-clamp-2 text-sm text-gray-600">{hotel.description}</p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-lg font-bold text-teal-600">
-                      {t.common.from} ${hotel.basePricePerNight}
-                      <span className="text-sm font-normal text-gray-500">{t.common.perNight}</span>
+                    <span className="text-lg font-bold text-brand break-words">
+                      {formatPriceFromUsd(hotel.basePricePerNight, locale)}
+                      <span className="text-sm font-normal text-gray-500"> {t.common.perNight}</span>
                     </span>
                     <Button size="sm">{t.common.viewDetails}</Button>
                   </div>
@@ -92,7 +95,11 @@ function SearchContent() {
           ))}
         </div>
         {hotels.length === 0 && (
-          <p className="py-12 text-center text-gray-500">No hotels match your search. Try different filters.</p>
+          <p className="py-12 text-center text-gray-500">
+            {locale === 'mn'
+              ? 'Таны хайлтад тохирох зочид буудал олдсонгүй. Өөр шүүлтүүрээр дахин оролдоно уу.'
+              : 'No hotels match your search. Try different filters.'}
+          </p>
         )}
       </div>
       <Footer />
@@ -101,12 +108,16 @@ function SearchContent() {
 }
 
 export default function SearchPage() {
+  const { locale } = useLocale();
+
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="mx-auto max-w-7xl px-4 pt-28 py-8">
-          <p className="text-center text-gray-500">Loading search...</p>
+        <div className="mx-auto max-w-7xl px-4 pt-32 py-8">
+          <p className="text-center text-gray-500">
+            {locale === 'mn' ? 'Хайлтын үр дүн ачаалж байна...' : 'Loading search...'}
+          </p>
         </div>
         <Footer />
       </div>

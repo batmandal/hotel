@@ -17,7 +17,7 @@ import type {
   SiteStat,
 } from '@/types';
 
-/** Mongolia-only branches (cities) */
+/** Байршлын мэдээлэл */
 export const locations: Location[] = [
   { id: 'loc-1', name: 'Ulaanbaatar', nameMn: 'Улаанбаатар', country: 'Mongolia', countryCode: 'MN' },
   { id: 'loc-2', name: 'Darkhan', nameMn: 'Дархан', country: 'Mongolia', countryCode: 'MN' },
@@ -28,153 +28,185 @@ export const locations: Location[] = [
 ];
 
 export const hospitalityServices: HospitalityService[] = [
-  { id: 'hs-1', name: 'Gym', nameMn: 'Жим', tagline: 'Where Wellness Meets Excellence', taglineMn: 'Эрүүл мэнд, шилдэг үйлчилгээ', imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600' },
-  { id: 'hs-2', name: 'Swimming Pool', nameMn: 'Усан сан', tagline: 'Jump In & Refresh Your Senses', taglineMn: 'Сэтгэл тайван амралт', imageUrl: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=600' },
-  { id: 'hs-3', name: 'Restaurant', nameMn: 'Ресторан', tagline: 'The Restaurant Hub', taglineMn: 'Ресторан төв', imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600' },
-  { id: 'hs-4', name: 'Pick Up & Drop', nameMn: 'Тээвэр', tagline: 'Luxury Transfers, Effortless Travel', taglineMn: 'Тайван аялал', imageUrl: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600' },
-  { id: 'hs-5', name: 'Parking Space', nameMn: 'Зогсоол', tagline: 'Safe, Spacious, & Always Available', taglineMn: 'Аюулгүй, том зай', imageUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600' },
+  { id: 'hs-1', name: 'Gym', nameMn: 'Жим', tagline: 'Where Wellness Meets Excellence', taglineMn: 'Эрүүл мэнд, шилдэг үйлчилгээ', imageUrl: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=600' },
+  { id: 'hs-2', name: 'Swimming Pool', nameMn: 'Усан сан', tagline: 'Jump In & Refresh Your Senses', taglineMn: 'Сэтгэл тайван амралт', imageUrl: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=600' },
+  { id: 'hs-3', name: 'Restaurant', nameMn: 'Ресторан', tagline: 'The Restaurant Hub', taglineMn: 'Ресторан төв', imageUrl: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=600' },
+  { id: 'hs-5', name: 'Parking Space', nameMn: 'Зогсоол', tagline: 'Safe, Spacious, & Always Available', taglineMn: 'Аюулгүй, том зай', imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600' },
 ];
 
 export const testimonials: Testimonial[] = [
-  { id: 't-1', author: 'Emily Watson', rating: 5, text: 'Staying at RegalNest Hotel was an absolute delight! The rooms were spotless, the staff was incredibly friendly, and the view from my balcony was breathtaking. The seamless check-in process and the delicious breakfast made my trip even more memorable. I can\'t wait to come back!', roomImageUrl: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600' },
-  { id: 't-2', author: 'Bat-Erdene', rating: 5, text: 'Тав тухтай ор, цэвэрхэн байр, маш сайн үйлчилгээ. Дахин ирнэ.', roomImageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600' },
+  { id: 't-1', author: 'Анужин Баяр', rating: 5, text: 'UbHotel зочид буудалд байрлах нь үнэхээр гайхалтай байлаа! Өрөөнүүд нь цэвэр цэмцгэр, ажилчид найрсаг, бас тагтнаас харагдах байдал үнэхээр тансаг. Өглөөний цай ч маш амттай байсан тул дахин ирэхдээ маш их баяртай байх болно!', roomImageUrl: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600' },
+  { id: 't-2', author: 'Бат-Эрдэнэ', rating: 5, text: 'Тав тухтай ор, цэвэрхэн байр, маш сайн үйлчилгээ. Дахин ирнэ.', roomImageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600' },
 ];
 
 export const siteStats: SiteStat[] = [
-  { value: '100k+', label: 'Satisfied Customers', labelMn: 'Сэтгэл ханамжтай зочдод' },
-  { value: '15+', label: 'Years Of Experience', labelMn: 'Туршлагатай жил' },
-  { value: '800+', label: 'Total Rooms', labelMn: 'Нийт өрөө' },
-  { value: '12k+', label: 'Total Staffs', labelMn: 'Нийт ажилтан' },
+  { value: '2,400+', label: 'Satisfied Customers', labelMn: 'Сэтгэл ханамжтай зочид' },
+  { value: '5+', label: 'Years Of Experience', labelMn: 'Туршлагатай жил' },
+  { value: '45+', label: 'Total Rooms', labelMn: 'Нийт өрөө' },
+  { value: '60+', label: 'Total Staff', labelMn: 'Нийт ажилтан' },
 ];
 
 export const users: User[] = [
   {
     id: 'user-1',
     email: 'guest@example.com',
-    name: 'John Doe',
-    phone: '+01 234 567 890',
+    name: 'Итгэл Батболд',
+    phone: '+976 89112233',
     role: 'guest',
-    locale: 'en',
+    locale: 'mn',
     createdAt: '2024-01-15T10:00:00Z',
   },
   {
     id: 'user-2',
-    email: 'staff@bookinn.com',
-    name: 'Jane Smith',
-    phone: '+01 236 547 587',
+    email: 'staff@ubhotel.mn',
+    name: 'Сарнай Ганболд',
+    phone: '+976 99112233',
     role: 'staff',
-    locale: 'en',
+    locale: 'mn',
     createdAt: '2024-02-01T09:00:00Z',
   },
   {
     id: 'user-3',
-    email: 'admin@bookinn.com',
-    name: 'Admin User',
+    email: 'admin@ubhotel.mn',
+    name: 'Админ Бат',
     role: 'admin',
-    locale: 'en',
+    locale: 'mn',
     createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 'user-4',
-    email: 'maria@example.com',
-    name: 'Maria Garcia',
-    phone: '+34 612 345 678',
+    email: 'nomin@example.com',
+    name: 'Номин Эрдэнэ',
+    phone: '+976 88123456',
     role: 'guest',
-    locale: 'en',
+    locale: 'mn',
     createdAt: '2024-03-01T12:00:00Z',
   },
   {
     id: 'user-5',
     email: 'reception@resort.com',
-    name: 'Bob Wilson',
+    name: 'Тэмүүлэн Энх',
     role: 'staff',
-    locale: 'en',
+    locale: 'mn',
     createdAt: '2024-02-15T08:00:00Z',
   },
 ];
 
-/** BookINN branches in Mongolia (single hotel brand) */
+/** UbHotel — Улаанбаатарын ганц буудал */
 export const hotels: Hotel[] = [
   {
     id: 'hotel-1',
-    name: 'BookINN Ulaanbaatar',
-    nameMn: 'BookINN Улаанбаатар',
-    slug: 'bookinn-ulaanbaatar',
+    name: 'UbHotel',
+    nameMn: 'UbHotel',
+    slug: 'ubhotel-ulaanbaatar',
     locationId: 'loc-1',
     address: 'Sukhbaatar Square, Ulaanbaatar',
-    category: 'resort',
+    category: 'hotel',
     starRating: 5,
     description:
-      'BookINN flagship branch in Ulaanbaatar. Pool, spa, restaurant, and premium rooms.',
-    descriptionMn: 'Улаанбаатар дахь төв салбар. Усан сан, спа, ресторан.',
-    amenities: ['Pool', 'Spa', 'Restaurant', 'Bar', 'Free WiFi', 'Pick Up & Drop'],
+      'UbHotel is a 5-star hotel in the heart of Ulaanbaatar. Modern rooms, business facilities, restaurant, pool, spa, and premium service.',
+    descriptionMn: 'Улаанбаатар хотын төвд байрлах 5 одтой зочид буудал. Орчин үеийн өрөө, бизнес үйлчилгээ, ресторан, усан сан, спа.',
+    amenities: ['Pool', 'Spa', 'Restaurant', 'Bar', 'Gym', 'Free WiFi', 'Parking'],
     imageUrls: [
-      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
-    ],
-    contactEmail: 'bookinn.hotel@gmail.com',
-    contactPhone: '+01 236 547 587',
-    basePricePerNight: 350,
-    currency: 'USD',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'hotel-2',
-    name: 'BookINN Darkhan',
-    nameMn: 'BookINN Дархан',
-    slug: 'bookinn-darkhan',
-    locationId: 'loc-2',
-    address: 'Central Street, Darkhan',
-    category: 'hotel',
-    starRating: 4,
-    description: 'Comfortable stay in Darkhan with restaurant and free WiFi.',
-    amenities: ['Restaurant', 'Gym', 'Free WiFi', 'Parking'],
-    imageUrls: [
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
       'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800',
     ],
-    contactEmail: 'bookinn.hotel@gmail.com',
-    contactPhone: '+01 236 547 587',
-    basePricePerNight: 180,
-    currency: 'USD',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'hotel-3',
-    name: 'BookINN Erdenet',
-    nameMn: 'BookINN Эрдэнэт',
-    slug: 'bookinn-erdenet',
-    locationId: 'loc-3',
-    address: 'Mining District, Erdenet',
-    category: 'hotel',
-    starRating: 4,
-    description: 'Business and leisure in Erdenet with pool and spa.',
-    amenities: ['Pool', 'Spa', 'Restaurant', 'Free WiFi', 'Parking'],
-    imageUrls: [
-      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800',
-    ],
-    contactEmail: 'bookinn.hotel@gmail.com',
-    contactPhone: '+01 236 547 587',
+    contactEmail: 'info@ubhotel.mn',
+    contactPhone: '+976 7011 2233',
     basePricePerNight: 120,
     currency: 'USD',
     createdAt: '2024-01-01T00:00:00Z',
   },
 ];
 
-export const rooms: Room[] = [
+/** Өрөө бүрт давтагдахгүй зураг — main + gallery (3 зураг тутамд) */
+const ROOM_IMAGES: string[][] = [
+  // room-SS000001: Standard Single (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200',
+    'https://images.unsplash.com/photo-1578774204375-826dc5d996ed?w=1200',
+    'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200',
+  ],
+  // room-SD000002: Standard Double (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1200',
+    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200',
+    'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=1200',
+  ],
+  // room-TD000003: Twin Deluxe (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1200',
+    'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200',
+    'https://images.unsplash.com/photo-1564078516393-cf04bd966897?w=1200',
+  ],
+  // room-DD000004: Deluxe Double (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200',
+    'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=1200',
+    'https://images.unsplash.com/photo-1562438668-bcf0ca6578f0?w=1200',
+  ],
+  // room-SU000005: Suite (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=1200',
+    'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=1200',
+    'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=1200',
+  ],
+  // room-FM000006: Family Room (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200',
+    'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=1200',
+    'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=1200',
+  ],
+  // room-SU000007: Executive Suite (hotel-1)
+  [
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200',
+    'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200',
+  ],
+  // room-SS000008: Standard Single
+  [
+    'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1200',
+    'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=1200',
+    'https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?w=1200',
+  ],
+  // room-SD000009: Standard Double
+  [
+    'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=1200',
+    'https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=1200',
+    'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=1200',
+  ],
+  // room-DD000010: Deluxe King
+  [
+    'https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e?w=1200',
+    'https://images.unsplash.com/photo-1605346576608-92f1346b67d6?w=1200',
+    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1200',
+  ],
+  // room-SU000011: Suite
+  [
+    'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200',
+    'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=1200',
+    'https://images.unsplash.com/photo-1560448075-bb485b067938?w=1200',
+  ],
+];
+
+const roomSeeds: Array<Omit<Room, 'imageUrls'>> = [
   { id: 'room-SS000001', hotelId: 'hotel-1', typeCode: 'SS', typeName: 'Standard Single', floor: 1, number: '101', status: 'available', basePricePerNight: 120, maxGuests: 1, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV'], description: 'Cozy single room with queen bed, ideal for solo travelers. Includes work desk and city view.', descriptionMn: 'Ганц зочдод тохиромжтой тав тухтай нэг ортой өрөө. Ажлын ширээ, хотын харагдацтай.' },
   { id: 'room-SD000002', hotelId: 'hotel-1', typeCode: 'SD', typeName: 'Standard Double', floor: 1, number: '102', status: 'available', basePricePerNight: 180, maxGuests: 2, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV', 'Balcony'], recommended: true, description: 'Spacious double room with king bed and private balcony. Perfect for couples.', descriptionMn: 'Том давхар ор, хувийн тагтаатай. Хосуудад тохиромжтой.' },
   { id: 'room-TD000003', hotelId: 'hotel-1', typeCode: 'TD', typeName: 'Twin Deluxe', floor: 2, number: '201', status: 'occupied', basePricePerNight: 220, maxGuests: 2, maxExtraBeds: 1, amenities: ['WiFi', 'AC', 'TV'], description: 'Deluxe twin room with two double beds. Extra bed available on request.', descriptionMn: 'Хоёр давхар ортой делюкс өрөө. Нэмэлт ор хүсэлтээр боломжтой.' },
   { id: 'room-DD000004', hotelId: 'hotel-1', typeCode: 'DD', typeName: 'Deluxe Double', floor: 2, number: '202', status: 'reserved', basePricePerNight: 280, maxGuests: 3, maxExtraBeds: 1, amenities: ['WiFi', 'AC', 'TV', 'Bathtub'], recommended: true, description: 'Premium double with bathtub and city views. Up to 3 guests with optional extra bed.', descriptionMn: 'Угаалгын өрөөтэй, хотын харагдацтай. 3 хүртэл зочдод тохиромжтой.' },
   { id: 'room-SU000005', hotelId: 'hotel-1', typeCode: 'SU', typeName: 'Suite', floor: 3, number: '301', status: 'available', basePricePerNight: 450, maxGuests: 4, maxExtraBeds: 2, amenities: ['WiFi', 'AC', 'TV', 'Living Room', 'Jacuzzi'], sizeSqm: 65, recommended: true, description: 'Luxury suite with separate living area and jacuzzi. 65 m² of comfort.', descriptionMn: 'Тусгаар зочлын өрөө, жаккузитай люкс сүүт. 65 м² тав тухтай зай.' },
   { id: 'room-FM000006', hotelId: 'hotel-1', typeCode: 'FM', typeName: 'Family Room', floor: 2, number: '203', status: 'cleaning', basePricePerNight: 320, maxGuests: 5, maxExtraBeds: 2, amenities: ['WiFi', 'AC', 'TV', 'Connecting Rooms'], sizeSqm: 45, description: 'Family-friendly room with connecting option. Sleeps up to 5 with extra beds.', descriptionMn: 'Гэр бүлд тохиромжтой, холбох өрөөний сонголттой. 5 хүртэл зочдод.' },
-  { id: 'room-VP000007', hotelId: 'hotel-1', typeCode: 'VP', typeName: 'Villa with Pool', floor: 0, number: 'V1', status: 'available', basePricePerNight: 650, maxGuests: 6, maxExtraBeds: 2, amenities: ['Private Pool', 'WiFi', 'AC', 'Kitchen', 'Garden'], sizeSqm: 120, recommended: true, description: 'Private villa with pool, kitchen, and garden. Ultimate luxury for up to 6 guests.', descriptionMn: 'Хувийн усан сан, гал тогоо, цэцэрлэгтэй вилла. 6 хүртэл зочдод.' },
-  { id: 'room-SS000008', hotelId: 'hotel-2', typeCode: 'SS', typeName: 'Standard Single', floor: 5, number: '501', status: 'available', basePricePerNight: 95, maxGuests: 1, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV'], description: 'Compact single room with all essentials. Great value for solo stays.', descriptionMn: 'Бүх шаардлагатай зүйлтэй нэг ортой өрөө.' },
-  { id: 'room-SD000009', hotelId: 'hotel-2', typeCode: 'SD', typeName: 'Standard Double', floor: 5, number: '502', status: 'available', basePricePerNight: 140, maxGuests: 2, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV'], description: 'Comfortable double room for two. Central location in the building.', descriptionMn: 'Хоёр зочдод тохиромжтой тав тухтай давхар өрөө.' },
-  { id: 'room-DD000010', hotelId: 'hotel-2', typeCode: 'DD', typeName: 'Deluxe King', floor: 8, number: '801', status: 'maintenance', basePricePerNight: 220, maxGuests: 3, maxExtraBeds: 1, amenities: ['WiFi', 'AC', 'TV'], description: 'King-size bed deluxe room with premium amenities. Top floor views.', descriptionMn: 'Кинг ортой делюкс өрөө. Дээд давхартын харагдац.' },
-  { id: 'room-SU000011', hotelId: 'hotel-3', typeCode: 'SU', typeName: 'Suite', floor: 0, number: 'A1', status: 'available', basePricePerNight: 120, maxGuests: 4, maxExtraBeds: 1, amenities: ['Pool', 'WiFi', 'Kitchen'], sizeSqm: 85, recommended: true, description: 'Spacious suite with pool access and kitchenette. 85 m².', descriptionMn: 'Усан сан руу гарцтай, жижиг гал тогоотой сүүт. 85 м².' },
+  { id: 'room-SU000007', hotelId: 'hotel-1', typeCode: 'SU', typeName: 'Executive Suite', floor: 10, number: '1001', status: 'available', basePricePerNight: 650, maxGuests: 4, maxExtraBeds: 1, amenities: ['WiFi', 'AC', 'TV', 'Living Room', 'Workspace'], sizeSqm: 75, recommended: true, description: 'Executive suite with separate living area and workspace. Ideal for business travelers.', descriptionMn: 'Тусгаар зочлын хэсэг, ажлын булантай executive suite. Бизнес аялалд тохиромжтой.' },
+  { id: 'room-SS000008', hotelId: 'hotel-1', typeCode: 'SS', typeName: 'Standard Single', floor: 5, number: '501', status: 'available', basePricePerNight: 95, maxGuests: 1, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV'], description: 'Compact single room with all essentials. Great value for solo stays.', descriptionMn: 'Бүх шаардлагатай зүйлтэй нэг ортой өрөө.' },
+  { id: 'room-SD000009', hotelId: 'hotel-1', typeCode: 'SD', typeName: 'Standard Double', floor: 5, number: '502', status: 'available', basePricePerNight: 140, maxGuests: 2, maxExtraBeds: 0, amenities: ['WiFi', 'AC', 'TV'], description: 'Comfortable double room for two. Central location in the building.', descriptionMn: 'Хоёр зочдод тохиромжтой тав тухтай давхар өрөө.' },
+  { id: 'room-DD000010', hotelId: 'hotel-1', typeCode: 'DD', typeName: 'Deluxe King', floor: 8, number: '801', status: 'maintenance', basePricePerNight: 220, maxGuests: 3, maxExtraBeds: 1, amenities: ['WiFi', 'AC', 'TV'], description: 'King-size bed deluxe room with premium amenities. Top floor views.', descriptionMn: 'Кинг ортой делюкс өрөө. Дээд давхартын харагдац.' },
+  { id: 'room-SU000011', hotelId: 'hotel-1', typeCode: 'SU', typeName: 'Suite', floor: 0, number: 'A1', status: 'available', basePricePerNight: 120, maxGuests: 4, maxExtraBeds: 1, amenities: ['Pool', 'WiFi', 'Kitchen'], sizeSqm: 85, recommended: true, description: 'Spacious suite with pool access and kitchenette. 85 m².', descriptionMn: 'Усан сан руу гарцтай, жижиг гал тогоотой сүүт. 85 м².' },
 ];
+
+export const rooms: Room[] = roomSeeds.map((r, i) => ({
+  ...r,
+  imageUrls: ROOM_IMAGES[i] ?? ROOM_IMAGES[0],
+}));
 
 export const extraServices: ExtraService[] = [
   { id: 'srv-1', name: 'Airport Transfer', nameMn: 'Нисэх онгоцны шилжилт', price: 35, perPerson: false },
@@ -271,7 +303,7 @@ export const bookings: Booking[] = [
     id: 'book-4',
     bookingNumber: 'BK000004',
     userId: 'user-4',
-    hotelId: 'hotel-2',
+    hotelId: 'hotel-1',
     roomIds: ['room-SD000009'],
     checkIn: '2025-04-01',
     checkOut: '2025-04-03',

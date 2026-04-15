@@ -1,4 +1,4 @@
-# BookINN UI Design System
+# UBhotel UI Design System
 
 This document defines the UI color palette, components, and styling conventions. When changing UI colors or layout, follow these rules so the app stays consistent.
 
