@@ -1,52 +1,120 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { users, bookings } from '@/data/mockData';
+import { prisma } from '@/lib/db';
+
+type Params = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/users/:id
- * Тухайн хэрэглэгчийн мэдээлэл + захиалгын түүх
+ * Хэрэглэгчийн мэдээлэл + захиалгын түүх
  */
-export function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  return params.then(({ id }) => {
-    const user = users.find((u) => u.id === id);
+export async function GET(_request: NextRequest, { params }: Params) {
+  const { id } = await params;
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 },
-      );
-    }
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      role: true,
+      locale: true,
+      createdAt: true,
+      bookings: {
+        select: {
+          id: true,
+          bookingNumber: true,
+          hotelId: true,
+          checkIn: true,
+          checkOut: true,
+          nights: true,
+          guests: true,
+          status: true,
+          totalAmount: true,
+          currency: true,
+          createdAt: true,
+          rooms: {
+            select: { room: { select: { id: true, number: true, typeName: true } } },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
 
-    const userBookings = bookings
-      .filter((b) => b.userId === id)
-      .map(({ id, bookingNumber, hotelId, roomIds, checkIn, checkOut, nights, guests, status, totalAmount, currency, createdAt }) => ({
-        id,
-        bookingNumber,
-        hotelId,
-        roomIds,
-        checkIn,
-        checkOut,
-        nights,
-        guests,
-        status,
-        totalAmount,
-        currency,
-        createdAt,
-      }));
+  if (!user) {
+    return NextResponse.json({ error: 'Хэрэглэгч олдсонгүй' }, { status: 404 });
+  }
 
-    return NextResponse.json({
+  const data = {
+    ...user,
+    bookings: user.bookings.map((b) => ({
+      ...b,
+      roomIds: b.rooms.map((br) => br.room.id),
+      roomNumbers: b.rooms.map((br) => br.room.number),
+      rooms: undefined,
+    })),
+  };
+
+  return NextResponse.json({ data });
+}
+
+/**
+ * PUT /api/users/:id
+ * Body: { name?, phone?, email?, role?, locale? }
+ */
+export async function PUT(request: NextRequest, { params }: Params) {
+  const { id } = await params;
+
+  try {
+    const body = await request.json();
+    const { name, phone, email, role, locale } = body;
+
+    const user = await prisma.user.update({
+      where: { id },
       data: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone ?? null,
-        role: user.role,
-        locale: user.locale,
-        createdAt: user.createdAt,
-        bookings: userBookings,
+        ...(name !== undefined && { name }),
+        ...(phone !== undefined && { phone }),
+        ...(email !== undefined && { email }),
+        ...(role !== undefined && { role }),
+        ...(locale !== undefined && { locale }),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        locale: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
-  });
+
+    return NextResponse.json({ data: user });
+  } catch (err: any) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ error: 'Хэрэглэгч олдсонгүй' }, { status: 404 });
+    }
+    console.error('PUT /api/users/:id error:', err);
+    return NextResponse.json({ error: 'Серверийн алдаа' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/users/:id
+ */
+export async function DELETE(_request: NextRequest, { params }: Params) {
+  const { id } = await params;
+
+  try {
+    await prisma.user.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ error: 'Хэрэглэгч олдсонгүй' }, { status: 404 });
+    }
+    console.error('DELETE /api/users/:id error:', err);
+    return NextResponse.json({ error: 'Серверийн алдаа' }, { status: 500 });
+  }
 }

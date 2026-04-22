@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,22 +10,20 @@ import { useLocale } from "@/context/LocaleContext";
 import { useAuth } from "@/context/AuthContext";
 import type { UserRole } from "@/context/AuthContext";
 import { AuthFormCard, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { Shield, UserCheck, Loader2 } from "lucide-react";
 
-// City/business hotel vibe (not resort)
 const LOGIN_IMAGE =
   "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1920";
 
-const TEMP_ACCOUNTS: Array<{
-  displayName: string;
+type QuickAccount = {
+  name: string;
   email: string;
   phone: string;
   password: string;
-  role: UserRole;
-}> = [
-  { displayName: "Демо зочин", email: "user@demo.mn", phone: "99112233", password: "user123", role: "GUEST" },
-  { displayName: "Демо ажилтан", email: "ajiltan@demo.mn", phone: "88112233", password: "staff123", role: "STAFF" },
-  { displayName: "Демо админ", email: "admin@demo.mn", phone: "77112233", password: "admin123", role: "ADMIN" },
-];
+  role: string;
+  department?: string;
+  position?: string;
+};
 
 const inputClass =
   "mt-2 h-11 rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/70 focus-visible:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/25";
@@ -39,29 +37,89 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const normalizedIdentifier = identifier.trim().toLowerCase();
-    const matchedAccount = TEMP_ACCOUNTS.find(
-      (acc) =>
-        (acc.email.toLowerCase() === normalizedIdentifier || acc.phone === normalizedIdentifier) &&
-        acc.password === password
-    );
-    if (matchedAccount) {
-      setError("");
-      login(matchedAccount.email, matchedAccount.role, {
-        displayName: matchedAccount.displayName,
-        phone: matchedAccount.phone,
-      });
-      router.push("/");
-      return;
+  // Real accounts from DB
+  const [staffAccounts, setStaffAccounts] = useState<QuickAccount[]>([]);
+  const [adminAccounts, setAdminAccounts] = useState<QuickAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAccounts() {
+      try {
+        const staffRes = await fetch("/api/staff");
+        const staffJson = await staffRes.json();
+        const staffList: QuickAccount[] = (staffJson.data ?? [])
+          .filter((s: any) => s.user?.role === 'staff')
+          .slice(0, 1)
+          .map((s: any) => ({
+            name: s.user.name,
+            email: s.user.email,
+            phone: s.user.phone || '-',
+            password: 'staff123',
+            role: 'staff',
+            department: s.department,
+            position: s.position,
+          }));
+
+        const adminList: QuickAccount[] = (staffJson.data ?? [])
+          .filter((s: any) => s.user?.role === 'admin')
+          .slice(0, 1)
+          .map((s: any) => ({
+            name: s.user.name,
+            email: s.user.email,
+            phone: s.user.phone || '-',
+            password: 'admin123',
+            role: 'admin',
+            department: s.department,
+            position: s.position,
+          }));
+
+        setStaffAccounts(staffList);
+        setAdminAccounts(adminList);
+      } catch {
+        // fallback
+      } finally {
+        setAccountsLoading(false);
+      }
     }
-    setError(
-      locale === "mn"
-        ? "И-мэйл/утас эсвэл нууц үг буруу байна."
-        : "Invalid email/phone or password."
-    );
+    fetchAccounts();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error || (locale === "mn" ? "Нэвтрэх боломжгүй" : "Login failed"));
+        setLoading(false);
+        return;
+      }
+
+      const user = json.data;
+      login(user.email, user.frontendRole as UserRole, {
+        displayName: user.name,
+        phone: user.phone || undefined,
+      });
+
+      if (user.frontendRole === "ADMIN") router.push("/admin");
+      else if (user.frontendRole === "STAFF") router.push("/staff");
+      else router.push("/");
+    } catch {
+      setError(locale === "mn" ? "Сервертэй холбогдож чадсангүй" : "Could not connect to server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,13 +128,9 @@ export default function LoginPage() {
       variant="overlay"
       brandTagline={
         locale === "mn" ? (
-          <>
-            Зочид буудлын захиалгаа хялбархан хийгээрэй.
-          </>
+          <>Зочид буудлын захиалгаа хялбархан хийгээрэй.</>
         ) : (
-          <>
-            Book your hotel room in just a few steps.
-          </>
+          <>Book your hotel room in just a few steps.</>
         )
       }
     >
@@ -95,7 +149,7 @@ export default function LoginPage() {
             <Input
               id="login-identifier"
               type="text"
-              placeholder={locale === "mn" ? "user@demo.mn эсвэл 99112233" : "user@demo.mn or 99112233"}
+              placeholder={locale === "mn" ? "имэйл эсвэл утас" : "email or phone"}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               className={inputClass}
@@ -131,26 +185,72 @@ export default function LoginPage() {
           </div>
           <Button
             type="submit"
-            className="h-12 w-full rounded-xl bg-white/85 text-gray-900 hover:bg-white shadow-sm text-base font-semibold"
+            disabled={loading}
+            className="h-12 w-full rounded-xl bg-white/85 text-gray-900 hover:bg-white shadow-sm text-base font-semibold disabled:opacity-50"
             size="lg"
           >
-            {t.nav.login}
+            {loading ? (locale === "mn" ? "Нэвтэрч байна..." : "Signing in...") : t.nav.login}
           </Button>
           {error ? <p className="text-sm text-red-200">{error}</p> : null}
         </form>
 
-        <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
-            {locale === "mn" ? "Демо account" : "Demo accounts"}
-          </p>
-          <ul className="mt-2 space-y-1.5 text-xs text-white/75">
-            {TEMP_ACCOUNTS.map((acc) => (
-              <li key={acc.email} className="leading-snug">
-                {`email: ${acc.email} | phone: ${acc.phone} | password: ${acc.password} | role: ${acc.role}`}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Real accounts info (text only) */}
+        {!accountsLoading && (adminAccounts.length > 0 || staffAccounts.length > 0) && (
+          <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4 space-y-3">
+            {adminAccounts.length > 0 && (
+              <div>
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-300 mb-2">
+                  <Shield className="h-3.5 w-3.5" />
+                  {locale === "mn" ? "Админ нэвтрэх мэдээлэл" : "Admin credentials"}
+                </p>
+                <table className="w-full text-xs text-white/70">
+                  <thead>
+                    <tr className="text-left text-white/40">
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Нэр" : "Name"}</th>
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Утас" : "Phone"}</th>
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Нууц үг" : "Password"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminAccounts.map((acc) => (
+                      <tr key={acc.email}>
+                        <td className="py-0.5 font-medium text-white/90">{acc.name}</td>
+                        <td className="py-0.5 font-mono text-white/80">{acc.phone}</td>
+                        <td className="py-0.5 font-mono text-white/80">{acc.password}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {staffAccounts.length > 0 && (
+              <div>
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-300 mb-2">
+                  <UserCheck className="h-3.5 w-3.5" />
+                  {locale === "mn" ? "Ажилтан нэвтрэх мэдээлэл" : "Staff credentials"}
+                </p>
+                <table className="w-full text-xs text-white/70">
+                  <thead>
+                    <tr className="text-left text-white/40">
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Нэр" : "Name"}</th>
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Утас" : "Phone"}</th>
+                      <th className="pb-1 font-medium">{locale === "mn" ? "Нууц үг" : "Password"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {staffAccounts.map((acc) => (
+                      <tr key={acc.email}>
+                        <td className="py-0.5 font-medium text-white/90">{acc.name}</td>
+                        <td className="py-0.5 font-mono text-white/80">{acc.phone}</td>
+                        <td className="py-0.5 font-mono text-white/80">{acc.password}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         <p className="mt-6 text-center text-sm text-white/80">
           {locale === "mn" ? "Бүртгэл байхгүй юу?" : "Don't have an account?"}{" "}

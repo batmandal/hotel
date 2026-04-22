@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Hotel, FileCheck2, ArrowLeft, LogOut, Menu, X, UserPlus, CalendarPlus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export type StaffTab = 'rooms' | 'guests' | 'booking' | 'reports';
 
@@ -20,6 +21,7 @@ interface StaffLayoutProps {
 export function StaffLayout({ activeTab, onTabChange, locale, headerTitle, headerRight, children }: StaffLayoutProps) {
   const { logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleTabChange = (tab: StaffTab) => {
     onTabChange(tab);
@@ -98,12 +100,23 @@ export function StaffLayout({ activeTab, onTabChange, locale, headerTitle, heade
               {locale === 'mn' ? 'Нүүр хуудас руу буцах' : 'Back to Site'}
             </button>
           </Link>
-          <button onClick={logout} className="w-full flex mt-1 items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+          <button onClick={() => setShowLogoutConfirm(true)} className="w-full flex mt-1 items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
             <LogOut className="h-4 w-4" />
             {locale === 'mn' ? 'Гарах' : 'Log out'}
           </button>
         </div>
       </aside>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onConfirm={() => { setShowLogoutConfirm(false); logout(); }}
+        onCancel={() => setShowLogoutConfirm(false)}
+        title={locale === 'mn' ? 'Системээс гарах' : 'Log out'}
+        message={locale === 'mn' ? 'Та гарахдаа итгэлтэй байна уу?' : 'Are you sure you want to log out?'}
+        confirmLabel={locale === 'mn' ? 'Тийм, гарах' : 'Yes, log out'}
+        cancelLabel={locale === 'mn' ? 'Үгүй' : 'No'}
+        variant="danger"
+      />
 
       {/* MAIN CONTENT */}
       <main className="flex-1 overflow-y-auto flex flex-col">

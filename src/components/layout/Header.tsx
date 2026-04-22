@@ -7,12 +7,14 @@ import { Button } from '@/components/ui/button';
 import { useTranslations } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 import { useAuth } from '@/context/AuthContext';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function Header() {
   const { locale, setLocale } = useLocale();
   const { isAuthenticated, isReady, userRole, logout } = useAuth();
   const [langOpen, setLangOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const t = useTranslations(locale);
 
@@ -122,7 +124,7 @@ export function Header() {
                     variant="outline"
                     size="sm"
                     className="gap-2 border-white text-white hover:bg-white/10"
-                    onClick={() => logout()}
+                    onClick={() => setShowLogoutConfirm(true)}
                   >
                     {t.nav.logout}
                   </Button>
@@ -202,7 +204,7 @@ export function Header() {
                       <LayoutDashboard className="h-4 w-4" />{userRole === 'ADMIN' ? t.nav.adminDashboard : t.nav.staffDashboard}
                     </Link>
                   )}
-                  <button type="button" className="w-full text-left flex items-center gap-3 rounded-lg px-4 py-3 text-red-300 hover:bg-white/10" onClick={() => { logout(); setMobileOpen(false); }}>
+                  <button type="button" className="w-full text-left flex items-center gap-3 rounded-lg px-4 py-3 text-red-300 hover:bg-white/10" onClick={() => { setMobileOpen(false); setShowLogoutConfirm(true); }}>
                     {t.nav.logout}
                   </button>
                 </>
@@ -220,6 +222,16 @@ export function Header() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onConfirm={() => { setShowLogoutConfirm(false); logout(); }}
+        onCancel={() => setShowLogoutConfirm(false)}
+        title={locale === 'mn' ? 'Системээс гарах' : 'Log out'}
+        message={locale === 'mn' ? 'Та гарахдаа итгэлтэй байна уу?' : 'Are you sure you want to log out?'}
+        confirmLabel={locale === 'mn' ? 'Тийм, гарах' : 'Yes, log out'}
+        cancelLabel={locale === 'mn' ? 'Үгүй' : 'No'}
+        variant="danger"
+      />
     </header>
   );
 }

@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ ENUMS ============
+
+enum UserRole {
+  guest
+  staff
+  admin
+  hotel_owner
+}
+
+enum RoomTypeCode {
+  SS
+  SD
+  TD
+  DD
+  SU
+  FM
+  VP
+}
+
+enum RoomStatus {
+  available
+  occupied
+  maintenance
+  reserved
+  cleaning
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  checked_in
+  checked_out
+  cancelled
+  no_show
+}
+
+enum RefundStatus {
+  none
+  partial
+  full
+  processing
+}
+
+enum HotelCategory {
+  resort
+  hotel
+  villa
+  apartment
+  hostel
+  lodge
+  boutique
+}
+
+enum DiscountType {
+  percentage
+  fixed
+}
+
+enum Locale {
+  en
+  mn
+}
+
+// ============ MODELS ============
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  phone     String?
+  password  String?
+  role      UserRole @default(guest)
+  locale    Locale   @default(mn)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookings     Booking[]
+  staffMember  StaffMember?
+
+  @@map("users")
+}
+
+model Location {
+  id          String  @id @default(cuid())
+  name        String
+  nameMn      String? @map("name_mn")
+  country     String
+  countryCode String  @map("country_code")
+
+  hotels Hotel[]
+
+  @@map("locations")
+}
+
+model Hotel {
+  id             String        @id @default(cuid())
+  name           String
+  nameMn         String?       @map("name_mn")
+  slug           String        @unique
+  locationId     String        @map("location_id")
+  address        String
+  category       HotelCategory @default(hotel)
+  starRating     Int           @default(0) @map("star_rating")
+  description    String
+  descriptionMn  String?       @map("description_mn")
+  amenities      String[]
+  imageUrls      String[]      @map("image_urls")
+  contactEmail   String        @map("contact_email")
+  contactPhone   String        @map("contact_phone")
+  basePricePerNight Float      @map("base_price_per_night")
+  currency       String        @default("USD")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  location     Location      @relation(fields: [locationId], references: [id])
+  rooms        Room[]
+  bookings     Booking[]
+  staffMembers StaffMember[]
+
+  @@map("hotels")
+}
+
+model Room {
+  id                String       @id @default(cuid())
+  hotelId           String       @map("hotel_id")
+  typeCode          RoomTypeCode @map("type_code")
+  typeName          String       @map("type_name")
+  typeNameMn        String?      @map("type_name_mn")
+  floor             Int
+  number            String
+  status            RoomStatus   @default(available)
+  basePricePerNight Float        @map("base_price_per_night")
+  maxGuests         Int          @map("max_guests")
+  maxExtraBeds      Int          @default(0) @map("max_extra_beds")
+  beds              Int?
+  sizeSqm           Int?         @map("size_sqm")
+  amenities         String[]
+  recommended       Boolean      @default(false)
+  description       String?
+  descriptionMn     String?      @map("description_mn")
+  imageUrls         String[]     @map("image_urls")
+  videoUrl          String?      @map("video_url")
+  videoThumbnailUrl String?      @map("video_thumbnail_url")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  hotel    Hotel     @relation(fields: [hotelId], references: [id])
+  bookings BookingRoom[]
+
+  @@unique([hotelId, number])
+  @@map("rooms")
+}
+
+model ExtraService {
+  id        String  @id @default(cuid())
+  name      String
+  nameMn    String? @map("name_mn")
+  price     Float
+  perPerson Boolean @default(false) @map("per_person")
+  perNight  Boolean @default(false) @map("per_night")
+
+  bookingServices BookingService[]
+
+  @@map("extra_services")
+}
+
+model Discount {
+  id        String       @id @default(cuid())
+  code      String       @unique
+  type      DiscountType
+  value     Float
+  minNights Int?         @map("min_nights")
+  validFrom DateTime     @map("valid_from")
+  validTo   DateTime     @map("valid_to")
+
+  bookings Booking[]
+
+  @@map("discounts")
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  bookingNumber       String        @unique @map("booking_number")
+  userId              String        @map("user_id")
+  hotelId             String        @map("hotel_id")
+  checkIn             DateTime      @map("check_in") @db.Date
+  checkOut            DateTime      @map("check_out") @db.Date
+  nights              Int
+  guests              Int
+  extraBeds           Int           @default(0) @map("extra_beds")
+  status              BookingStatus @default(pending)
+  basePricePerNight   Float         @map("base_price_per_night")
+  totalBase           Float         @map("total_base")
+  extraPersonFee      Float         @default(0) @map("extra_person_fee")
+  servicesTotal       Float         @default(0) @map("services_total")
+  discountAmount      Float         @default(0) @map("discount_amount")
+  taxAmount           Float         @default(0) @map("tax_amount")
+  serviceChargeAmount Float         @default(0) @map("service_charge_amount")
+  totalAmount         Float         @map("total_amount")
+  currency            String        @default("USD")
+  refundStatus        RefundStatus  @default(none) @map("refund_status")
+  refundAmount        Float?        @map("refund_amount")
+  discountId          String?       @map("discount_id")
+  specialRequests     String?       @map("special_requests")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  user     User          @relation(fields: [userId], references: [id])
+  hotel    Hotel         @relation(fields: [hotelId], references: [id])
+  discount Discount?     @relation(fields: [discountId], references: [id])
+  rooms    BookingRoom[]
+  services BookingService[]
+
+  @@index([hotelId, checkIn])
+  @@index([userId])
+  @@index([status])
+  @@map("bookings")
+}
+
+// Junction table: Booking <-> Room (нэг захиалгад олон өрөө)
+model BookingRoom {
+  bookingId String @map("booking_id")
+  roomId    String @map("room_id")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  room    Room    @relation(fields: [roomId], references: [id])
+
+  @@id([bookingId, roomId])
+  @@map("booking_rooms")
+}
+
+model BookingService {
+  id         String @id @default(cuid())
+  bookingId  String @map("booking_id")
+  serviceId  String @map("service_id")
+  quantity   Int    @default(1)
+  totalPrice Float  @map("total_price")
+
+  booking Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  service ExtraService @relation(fields: [serviceId], references: [id])
+
+  @@map("booking_services")
+}
+
+model StaffMember {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  hotelId     String   @map("hotel_id")
+  department  String
+  position    String
+  permissions String[]
+
+  user  User  @relation(fields: [userId], references: [id])
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+
+  @@map("staff_members")
+}

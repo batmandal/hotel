@@ -1,20 +1,33 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { bookings, users, hotels, rooms as allRooms } from '@/data/mockData';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import { useTranslations } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, ArrowLeft, Filter } from 'lucide-react';
+import { CalendarDays, ArrowLeft, Filter, Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import type { BookingStatus } from '@/types';
 import { formatPriceFromUsd } from '@/lib/pricing';
 
 type StatusFilter = 'all' | 'upcoming' | 'active' | 'past' | 'cancelled';
+
+type MyBooking = {
+  id: string;
+  bookingNumber: string;
+  hotelId: string;
+  hotelName: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  guests: number;
+  status: BookingStatus;
+  totalAmount: number;
+  roomNumbers: string[];
+};
 
 const statusBadgeVariant = (status: BookingStatus) => {
   switch (status) {
@@ -33,15 +46,49 @@ export default function MyBookingsPage() {
   const { locale } = useLocale();
   const t = useTranslations(locale);
   const [filter, setFilter] = useState<StatusFilter>('all');
+  const [loading, setLoading] = useState(true);
+  const [myBookings, setMyBookings] = useState<MyBooking[]>([]);
 
-  const currentUser = useMemo(() => users.find(u => u.email === userEmail), [userEmail]);
+  // Fetch bookings from API
+  useEffect(() => {
+    if (!userEmail) { setLoading(false); return; }
 
-  const myBookings = useMemo(() => {
-    if (!currentUser) return [];
-    return bookings
-      .filter(b => b.userId === currentUser.id)
-      .sort((a, b) => new Date(b.checkIn).getTime() - new Date(a.checkIn).getTime());
-  }, [currentUser]);
+    async function fetchBookings() {
+      try {
+        // Find user by email
+        const userRes = await fetch(`/api/users?q=${encodeURIComponent(userEmail!)}`);
+        const userJson = await userRes.json();
+        const currentUser = userJson.data?.find((u: any) => u.email === userEmail);
+        if (!currentUser) { setLoading(false); return; }
+
+        // Fetch bookings for this user
+        const bookingsRes = await fetch(`/api/bookings?userId=${currentUser.id}`);
+        const bookingsJson = await bookingsRes.json();
+
+        setMyBookings(
+          (bookingsJson.data ?? []).map((b: any) => ({
+            id: b.id,
+            bookingNumber: b.bookingNumber,
+            hotelId: b.hotelId,
+            hotelName: 'UbHotel',
+            checkIn: typeof b.checkIn === 'string' ? b.checkIn.slice(0, 10) : b.checkIn,
+            checkOut: typeof b.checkOut === 'string' ? b.checkOut.slice(0, 10) : b.checkOut,
+            nights: b.nights,
+            guests: b.guests,
+            status: b.status,
+            totalAmount: b.totalAmount,
+            roomNumbers: b.roomNumbers ?? [],
+          }))
+        );
+      } catch {
+        setMyBookings([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBookings();
+  }, [userEmail]);
 
   const filteredBookings = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -96,8 +143,9 @@ export default function MyBookingsPage() {
           ))}
         </div>
 
-        {/* Bookings List */}
-        {filteredBookings.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
+        ) : filteredBookings.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <CalendarDays className="h-12 w-12 mx-auto text-gray-300 mb-4" />
             <p className="text-gray-500 font-medium">
@@ -111,56 +159,49 @@ export default function MyBookingsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredBookings.map(b => {
-              const hotel = hotels.find(h => h.id === b.hotelId);
-              const roomNumbers = b.roomIds
-                .map(rid => allRooms.find(r => r.id === rid)?.number || rid)
-                .join(', ');
-
-              return (
-                <div key={b.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold text-gray-900">{hotel?.name || 'UbHotel'}</h3>
-                        <Badge variant={statusBadgeVariant(b.status)}>
-                          {b.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <p>
-                          <span className="font-medium text-gray-700">{locale === 'mn' ? 'Өрөө:' : 'Room:'}</span>{' '}
-                          {roomNumbers}
-                        </p>
-                        <p>
-                          <span className="font-medium text-gray-700">{locale === 'mn' ? 'Огноо:' : 'Dates:'}</span>{' '}
-                          {b.checkIn} → {b.checkOut} ({b.nights} {locale === 'mn' ? 'шөнө' : 'nights'})
-                        </p>
-                        <p>
-                          <span className="font-medium text-gray-700">{locale === 'mn' ? 'Зочид:' : 'Guests:'}</span>{' '}
-                          {b.guests} {locale === 'mn' ? 'хүн' : 'guests'}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {locale === 'mn' ? 'Захиалгын дугаар:' : 'Booking #:'} {b.bookingNumber}
-                        </p>
-                      </div>
+            {filteredBookings.map(b => (
+              <div key={b.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-bold text-gray-900">{b.hotelName}</h3>
+                      <Badge variant={statusBadgeVariant(b.status)}>
+                        {b.status.replace('_', ' ')}
+                      </Badge>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-lg font-bold text-brand break-words max-w-[min(100%,14rem)] sm:max-w-xs">{formatPriceFromUsd(b.totalAmount, locale)}</p>
-                      {(b.status === 'pending' || b.status === 'confirmed') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          {locale === 'mn' ? 'Цуцлах' : 'Cancel'}
-                        </Button>
-                      )}
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <p>
+                        <span className="font-medium text-gray-700">{locale === 'mn' ? 'Өрөө:' : 'Room:'}</span>{' '}
+                        {b.roomNumbers.join(', ') || '-'}
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-700">{locale === 'mn' ? 'Огноо:' : 'Dates:'}</span>{' '}
+                        {b.checkIn} → {b.checkOut} ({b.nights} {locale === 'mn' ? 'шөнө' : 'nights'})
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-700">{locale === 'mn' ? 'Зочид:' : 'Guests:'}</span>{' '}
+                        {b.guests} {locale === 'mn' ? 'хүн' : 'guests'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {locale === 'mn' ? 'Захиалгын дугаар:' : 'Booking #:'} {b.bookingNumber}
+                      </p>
                     </div>
                   </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-lg font-bold text-brand break-words max-w-[min(100%,14rem)] sm:max-w-xs">{formatPriceFromUsd(b.totalAmount, locale)}</p>
+                    {(b.status === 'pending' || b.status === 'confirmed') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        {locale === 'mn' ? 'Цуцлах' : 'Cancel'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>

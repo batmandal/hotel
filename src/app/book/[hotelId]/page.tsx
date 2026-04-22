@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getHotelById, getRoomsByHotelId, discounts, extraServices } from '@/data/mockData';
 import { calculateBookingTotal, getRefundPercentage, type PriceBreakdown } from '@/lib/booking';
 import { Header } from '@/components/layout/Header';
 import { useTranslations } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
+import { useAuth } from '@/context/AuthContext';
 import { formatPriceFromUsd, usdToMnt, formatMntAmount } from '@/lib/pricing';
+import { Loader2 } from 'lucide-react';
 
 const MOCK_OTP = '123456';
 
@@ -31,6 +32,8 @@ export default function BookPage() {
   const { locale } = useLocale();
   const t = useTranslations(locale);
 
+  const { userEmail } = useAuth();
+
   const [step, setStep] = useState<'details' | 'payment' | 'otp' | 'done'>('details');
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [checkIn, setCheckIn] = useState('2025-04-01');
@@ -39,12 +42,28 @@ export default function BookPage() {
   const [roomCount, setRoomCount] = useState(1);
   const [roomId, setRoomId] = useState(preselectedRoomId);
   const [discountCode, setDiscountCode] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState<typeof discounts[0] | null>(null);
+  const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [confirmedBookingNumber, setConfirmedBookingNumber] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-  const hotel = useMemo(() => getHotelById(hotelId), [hotelId]);
-  const allRooms = useMemo(() => (hotel ? getRoomsByHotelId(hotel.id) : []), [hotel]);
+  // Fetch hotel + rooms from API
+  const [hotel, setHotel] = useState<any>(null);
+  const [allRooms, setAllRooms] = useState<any[]>([]);
+  const [discounts, setDiscounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!hotelId) return;
+    Promise.all([
+      fetch(`/api/hotels/${hotelId}`).then(r => r.json()),
+      fetch(`/api/rooms?hotelId=${hotelId}`).then(r => r.json()),
+    ]).then(([hotelJson, roomsJson]) => {
+      setHotel(hotelJson.data ?? null);
+      setAllRooms(roomsJson.data ?? []);
+    }).finally(() => setLoading(false));
+  }, [hotelId]);
 
   const availableRooms = useMemo(() => {
     if (!allRooms.length) return [];
@@ -86,7 +105,13 @@ export default function BookPage() {
   }, [selectedRoom, nights, roomCount, guests, discountCode, appliedDiscount]);
 
   const handleApplyCode = () => {
-    const d = discounts.find((x) => x.code.toUpperCase() === discountCode.toUpperCase());
+    // Simple client-side check for known codes
+    const knownCodes: Record<string, any> = {
+      'WELCOME10': { code: 'WELCOME10', type: 'percentage', value: 10, minNights: 2 },
+      'LONGSTAY': { code: 'LONGSTAY', type: 'percentage', value: 15, minNights: 5 },
+      'FLAT50': { code: 'FLAT50', type: 'fixed', value: 50 },
+    };
+    const d = knownCodes[discountCode.toUpperCase()];
     if (d) setAppliedDiscount(d);
     else setAppliedDiscount(null);
   };
@@ -110,35 +135,100 @@ export default function BookPage() {
     if (paymentMethod) setStep('otp');
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.trim() === MOCK_OTP) {
-      setOtpError('');
-      setStep('done');
-    } else {
+  const handleVerifyOtp = async () => {
+    if (otp.trim() !== MOCK_OTP) {
       setOtpError(locale === 'mn' ? 'Код буруу байна. Демо код: 123456' : 'Invalid code. Use 123456 for demo.');
+      return;
+    }
+    setOtpError('');
+    setBookingLoading(true);
+
+    try {
+      // Find current user ID by email
+      const userRes = await fetch(`/api/users?q=${encodeURIComponent(userEmail || '')}`);
+      const userJson = await userRes.json();
+      const currentUser = userJson.data?.[0];
+      if (!currentUser) {
+        setOtpError(locale === 'mn' ? 'Хэрэглэгч олдсонгүй. Нэвтэрнэ үү.' : 'User not found. Please log in.');
+        setBookingLoading(false);
+        return;
+      }
+
+      // Create booking in DB
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          hotelId: hotel.id,
+          roomIds: selectedRoom ? [selectedRoom.id] : [],
+          checkIn,
+          checkOut,
+          guests,
+          basePricePerNight: selectedRoom?.basePricePerNight ?? 0,
+          totalBase: breakdown?.totalBase ?? 0,
+          extraPersonFee: breakdown?.extraPersonFee ?? 0,
+          servicesTotal: breakdown?.servicesTotal ?? 0,
+          discountAmount: breakdown?.discountAmount ?? 0,
+          taxAmount: breakdown?.taxAmount ?? 0,
+          serviceChargeAmount: breakdown?.serviceChargeAmount ?? 0,
+          totalAmount: breakdown?.totalAmount ?? 0,
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok) {
+        setConfirmedBookingNumber(json.data?.bookingNumber ?? '');
+        setStep('done');
+      } else {
+        setOtpError(json.error || (locale === 'mn' ? 'Захиалга үүсгэхэд алдаа гарлаа' : 'Failed to create booking'));
+      }
+    } catch {
+      setOtpError(locale === 'mn' ? 'Сервертэй холбогдож чадсангүй' : 'Could not connect to server');
+    } finally {
+      setBookingLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center pt-40"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
+      </div>
+    );
+  }
+
   if (!hotel) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16 text-center">
-        <p className="text-gray-500">{locale === 'mn' ? 'Буудал олдсонгүй.' : 'Hotel not found.'}</p>
-        <Link href="/" className="mt-4 inline-block text-brand hover:underline">{locale === 'mn' ? 'Нүүр хуудас' : 'Back to home'}</Link>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-32 text-center">
+          <p className="text-gray-500">{locale === 'mn' ? 'Буудал олдсонгүй.' : 'Hotel not found.'}</p>
+          <Link href="/" className="mt-4 inline-block text-brand hover:underline">{locale === 'mn' ? 'Нүүр хуудас' : 'Back to home'}</Link>
+        </div>
       </div>
     );
   }
 
   if (step === 'done') {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="mx-auto max-w-md rounded-xl bg-white p-8 text-center shadow-lg pt-32 pb-16">
-          <h1 className="text-2xl font-bold text-gray-900">{locale === 'mn' ? 'Захиалга баталгаажлаа!' : 'Booking confirmed!'}</h1>
-          <p className="mt-2 text-gray-600">{locale === 'mn' ? `${hotel.name} дахь захиалга амжилттай.` : `Your reservation at ${hotel.name} has been confirmed.`}</p>
-          <p className="mt-4 text-sm text-gray-500">{locale === 'mn' ? 'Захиалгын дугаар' : 'Confirmation number'}: BK{Date.now().toString().slice(-6)}</p>
-          <Link href="/" className="mt-6 inline-block">
-            <Button>{locale === 'mn' ? 'Нүүр хуудас' : 'Back to home'}</Button>
-          </Link>
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="mx-auto max-w-md px-4 pt-32 pb-16">
+          <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+            <h1 className="text-2xl font-bold text-gray-900">{locale === 'mn' ? 'Захиалга баталгаажлаа!' : 'Booking confirmed!'}</h1>
+            <p className="mt-2 text-gray-600">{locale === 'mn' ? `${hotel.name} дахь захиалга амжилттай.` : `Your reservation at ${hotel.name} has been confirmed.`}</p>
+            <p className="mt-4 text-sm text-gray-500">{locale === 'mn' ? 'Захиалгын дугаар' : 'Confirmation number'}: {confirmedBookingNumber}</p>
+            <div className="mt-6 flex gap-3 justify-center">
+              <Link href="/my-bookings">
+                <Button>{locale === 'mn' ? 'Миний захиалгууд' : 'My Bookings'}</Button>
+              </Link>
+              <Link href="/">
+                <Button variant="outline">{locale === 'mn' ? 'Нүүр хуудас' : 'Home'}</Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -227,27 +317,31 @@ export default function BookPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="mx-auto max-w-md rounded-xl bg-white p-8 shadow-lg px-4 pt-32 pb-16">
-          <button
-            type="button"
-            onClick={() => setStep('payment')}
-            className="mb-4 text-sm font-medium text-brand hover:underline"
-          >
-            {locale === 'mn' ? '← Төлбөр рүү буцах' : '← Back to payment'}
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">{t.booking.otpTitle}</h1>
-          <p className="mt-2 text-sm text-gray-600">{t.booking.otpSent}</p>
-          <Input
-            type="text"
-            placeholder={t.booking.otpPlaceholder}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="mt-4"
-            maxLength={6}
-          />
-          {otpError && <p className="mt-2 text-sm text-red-600">{otpError}</p>}
-          <Button onClick={handleVerifyOtp} className="mt-4 w-full">{t.booking.verify}</Button>
-          <p className="mt-4 text-center text-xs text-gray-400">{locale === 'mn' ? 'Демо код: 123456' : 'Demo: enter 123456'}</p>
+        <div className="mx-auto max-w-md px-4 pt-32 pb-16">
+          <div className="rounded-xl bg-white p-8 shadow-lg">
+            <button
+              type="button"
+              onClick={() => setStep('payment')}
+              className="mb-4 text-sm font-medium text-brand hover:underline"
+            >
+              {locale === 'mn' ? '← Төлбөр рүү буцах' : '← Back to payment'}
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">{t.booking.otpTitle}</h1>
+            <p className="mt-2 text-sm text-gray-600">{t.booking.otpSent}</p>
+            <Input
+              type="text"
+              placeholder={t.booking.otpPlaceholder}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="mt-4"
+              maxLength={6}
+            />
+            {otpError && <p className="mt-2 text-sm text-red-600">{otpError}</p>}
+            <Button onClick={handleVerifyOtp} disabled={bookingLoading} className="mt-4 w-full">
+              {bookingLoading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{locale === 'mn' ? 'Захиалга үүсгэж байна...' : 'Creating booking...'}</> : t.booking.verify}
+            </Button>
+            <p className="mt-4 text-center text-xs text-gray-400">{locale === 'mn' ? 'Демо код: 123456' : 'Demo: enter 123456'}</p>
+          </div>
         </div>
       </div>
     );

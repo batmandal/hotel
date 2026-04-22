@@ -10,7 +10,6 @@ import { useLocale } from '@/context/LocaleContext';
 import { useAuth } from '@/context/AuthContext';
 import { AuthFormCard, AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 
-// City/business hotel vibe (not resort)
 const SIGNUP_IMAGE = 'https://images.unsplash.com/photo-1562790351-d273a961e0e9?w=1920';
 
 const inputClass =
@@ -29,21 +28,57 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError('');
+    setError('');
+
     if (password !== confirmPassword) {
-      setPasswordError(locale === 'mn' ? 'Нууц үг тохирохгүй байна.' : 'Passwords do not match.');
+      setError(locale === 'mn' ? 'Нууц үг тохирохгүй байна.' : 'Passwords do not match.');
       return;
     }
-    if (firstName && lastName && phone && email && password) {
-      login(email, 'GUEST', {
-        displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
-        phone: phone.trim(),
+
+    if (password.length < 6) {
+      setError(locale === 'mn' ? 'Нууц үг хамгийн багадаа 6 тэмдэгт.' : 'Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          name: fullName,
+          password,
+          phone: phone.trim() || undefined,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error || (locale === 'mn' ? 'Бүртгэл амжилтгүй' : 'Signup failed'));
+        setLoading(false);
+        return;
+      }
+
+      // Бүртгэл амжилттай → автомат нэвтрэх
+      login(json.data.email, 'GUEST', {
+        displayName: json.data.name,
+        phone: json.data.phone || undefined,
       });
       router.push('/');
+    } catch {
+      setError(locale === 'mn' ? 'Сервертэй холбогдож чадсангүй' : 'Could not connect to server');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -175,18 +210,20 @@ export default function SignupPage() {
                 {showConfirmPassword ? 'Hide' : 'Show'}
               </button>
             </div>
-            {passwordError ? (
-              <p className="mt-1.5 text-sm text-red-200" role="alert">
-                {passwordError}
-              </p>
-            ) : null}
           </div>
+          {error ? (
+            <p className="text-sm text-red-200" role="alert">{error}</p>
+          ) : null}
           <Button
             type="submit"
-            className="h-12 w-full rounded-xl bg-white/85 text-gray-900 hover:bg-white shadow-sm text-base font-semibold"
+            disabled={loading}
+            className="h-12 w-full rounded-xl bg-white/85 text-gray-900 hover:bg-white shadow-sm text-base font-semibold disabled:opacity-50"
             size="lg"
           >
-            {signupT?.submit ?? (locale === 'mn' ? 'Бүртгүүлэх' : 'Sign up')}
+            {loading
+              ? (locale === 'mn' ? 'Бүртгэж байна...' : 'Creating account...')
+              : (signupT?.submit ?? (locale === 'mn' ? 'Бүртгүүлэх' : 'Sign up'))
+            }
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-white/80">
