@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
-import { MapPin, Heart, Bed, Bath, Square, Star, Loader2 } from "lucide-react";
+import { MapPin, Heart, Bed, Bath, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPriceFromUsd } from "@/lib/pricing";
 
@@ -53,7 +53,6 @@ function RoomsPageContent() {
   const [allRooms, setAllRooms] = useState<ApiRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
-  const [minStars, setMinStars] = useState(0);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState<number>(1);
@@ -73,19 +72,11 @@ function RoomsPageContent() {
     } else {
       setFilter("all");
     }
-    const starsParam = searchParams.get("stars");
-    if (starsParam) {
-      const n = parseInt(starsParam, 10);
-      setMinStars(!Number.isNaN(n) && n >= 1 && n <= 5 ? n : 0);
-    } else {
-      setMinStars(0);
-    }
   }, [searchParams]);
 
   const filtered = useMemo(() => {
     return allRooms.filter((room) => {
       if (!roomMatchesFilter(room.typeName, filter)) return false;
-      if (minStars > 0 && (room.hotelStarRating ?? 0) < minStars) return false;
       if (guests > 0 && room.maxGuests < guests) return false;
       if (checkIn && checkOut) {
         const inDate = new Date(checkIn);
@@ -97,7 +88,7 @@ function RoomsPageContent() {
       }
       return true;
     });
-  }, [allRooms, filter, minStars, guests, checkIn, checkOut]);
+  }, [allRooms, filter, guests, checkIn, checkOut]);
 
   const displayRooms = filtered.slice(0, 8);
 
@@ -114,26 +105,7 @@ function RoomsPageContent() {
             <p className="mb-3 text-sm font-medium text-gray-700">
               {r?.roomType ?? (locale === "mn" ? "Шүүлтүүр" : "Filters")}
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {/* Star rating filter */}
-              <div>
-                <label className="block text-xs font-medium text-gray-500">
-                  <Star className="mr-1 inline h-3 w-3 text-amber-500" />
-                  {r?.minHotelStars ?? (locale === "mn" ? "Зочид буудлын од" : "Hotel star rating")}
-                </label>
-                <select
-                  value={minStars === 0 ? "" : String(minStars)}
-                  onChange={(e) => setMinStars(e.target.value ? Number(e.target.value) : 0)}
-                  className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="">{r?.anyStars ?? (locale === "mn" ? "Бүгд" : "Any")}</option>
-                  <option value="1">★ 1+</option>
-                  <option value="2">★★ 2+</option>
-                  <option value="3">★★★ 3+</option>
-                  <option value="4">★★★★ 4+</option>
-                  <option value="5">★★★★★ 5</option>
-                </select>
-              </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500">{r?.checkIn ?? "Check-in"}</label>
                 <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="mt-1" />
