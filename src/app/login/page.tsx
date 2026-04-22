@@ -194,60 +194,26 @@ export default function LoginPage() {
           {error ? <p className="text-sm text-red-200">{error}</p> : null}
         </form>
 
-        {/* Real accounts info (text only) */}
+        {/* Admin & Staff credentials (text only) */}
         {!accountsLoading && (adminAccounts.length > 0 || staffAccounts.length > 0) && (
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/5 p-4 space-y-3">
-            {adminAccounts.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-300 mb-2">
-                  <Shield className="h-3.5 w-3.5" />
-                  {locale === "mn" ? "Админ нэвтрэх мэдээлэл" : "Admin credentials"}
-                </p>
-                <table className="w-full text-xs text-white/70">
-                  <thead>
-                    <tr className="text-left text-white/40">
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Нэр" : "Name"}</th>
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Утас" : "Phone"}</th>
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Нууц үг" : "Password"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {adminAccounts.map((acc) => (
-                      <tr key={acc.email}>
-                        <td className="py-0.5 font-medium text-white/90">{acc.name}</td>
-                        <td className="py-0.5 font-mono text-white/80">{acc.phone}</td>
-                        <td className="py-0.5 font-mono text-white/80">{acc.password}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <div className="mt-6 rounded-xl border border-white/15 bg-white/5 px-4 py-3 space-y-2 text-xs text-white/70">
+            {adminAccounts[0] && (
+              <p>
+                <Shield className="mr-1.5 inline h-3 w-3 text-red-300" />
+                <span className="text-white/40">{locale === "mn" ? "Админ" : "Admin"}:</span>{" "}
+                <span className="font-mono text-white/90">{adminAccounts[0].phone}</span>
+                <span className="mx-1.5 text-white/30">/</span>
+                <span className="font-mono text-white/90">{adminAccounts[0].password}</span>
+              </p>
             )}
-            {staffAccounts.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-300 mb-2">
-                  <UserCheck className="h-3.5 w-3.5" />
-                  {locale === "mn" ? "Ажилтан нэвтрэх мэдээлэл" : "Staff credentials"}
-                </p>
-                <table className="w-full text-xs text-white/70">
-                  <thead>
-                    <tr className="text-left text-white/40">
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Нэр" : "Name"}</th>
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Утас" : "Phone"}</th>
-                      <th className="pb-1 font-medium">{locale === "mn" ? "Нууц үг" : "Password"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {staffAccounts.map((acc) => (
-                      <tr key={acc.email}>
-                        <td className="py-0.5 font-medium text-white/90">{acc.name}</td>
-                        <td className="py-0.5 font-mono text-white/80">{acc.phone}</td>
-                        <td className="py-0.5 font-mono text-white/80">{acc.password}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {staffAccounts[0] && (
+              <p>
+                <UserCheck className="mr-1.5 inline h-3 w-3 text-blue-300" />
+                <span className="text-white/40">{locale === "mn" ? "Ажилтан" : "Staff"}:</span>{" "}
+                <span className="font-mono text-white/90">{staffAccounts[0].phone}</span>
+                <span className="mx-1.5 text-white/30">/</span>
+                <span className="font-mono text-white/90">{staffAccounts[0].password}</span>
+              </p>
             )}
           </div>
         )}
